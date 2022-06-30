@@ -1,8 +1,47 @@
-input {
-    width: 100%;   
+body {
+    display: grid;
+    grid-template-columns: 35% 65%;
+    grid-column-gap: 50px;
+    background-color: rgb(67, 117, 217);
+    margin: 0 0 0 0;
+}
+
+form {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.container {
+    width: 60%;
+}
+
+.bmg {
+    background-image: url("img2.png");
+    background-size: 100% 100%;
+    background-repeat: cover;
+}
+
+label {
+    font-size: 1.25em;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+button {
+    font-size: 1.25em;
+    font-family: sans-serif
+}
+
+input[type="text"], input[type="password"], input[type="email"] {
+    width: 100%;    
     margin: 8px 0;  
     padding: 12px 20px;   
-    display: inline-block;   
+    display: block;   
     border: 2px solid black;   
     box-sizing: border-box;   
+}
+
+input[type="submit"] {
+    font-size: 1.2em;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }

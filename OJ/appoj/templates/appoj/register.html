@@ -5,12 +5,15 @@
 <form action = "/appoj/register" method="POST">
     {% csrf_token %}
     <div class="container">   
-        <label>Username : </label>   
+        <label>Username  </label>   
         <input type="text" placeholder="Enter Username" name="username" required>  
-        <label>Email : </label>   
+        <label>Email </label>   
         <input type="email" placeholder="Enter Email" name="email" required>  
-        <label>Password : </label>   
+        <label>Password </label>   
         <input type="password" placeholder="Enter Password" name="password" required>  
-        <button type="submit">Register</button>  
+        <input type="submit" class="button" value ="Register">
     </div>
 </form>
+<div class="bmg">
+        
+</div>

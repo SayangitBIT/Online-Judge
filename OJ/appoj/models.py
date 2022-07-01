@@ -13,8 +13,12 @@ class Problems(models.Model):
     problem_id = models.AutoField(primary_key = True)
     description = models.CharField(max_length = 255)
     difficulty = models.CharField(max_length = 200)
-    solved_status = models.CharField(max_length = 200)
     score = models.FloatField(default = 0)
+
+class Verdicts(models.Model):
+    problem_id = models.ForeignKey(Problems, verbose_name = ('problem_id'), on_delete = models.CASCADE)
+    user_id = models.ForeignKey(UserProfile, verbose_name = ('verdict_user_id'), on_delete = models.CASCADE)
+    solved_status = models.CharField(max_length = 200)
 
 class TestCases(models.Model):
     problem_id = models.ForeignKey(Problems, verbose_name = ('problem_id'), on_delete = models.CASCADE, primary_key = True)

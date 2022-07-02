@@ -47,21 +47,31 @@ def problems(request):
     dux = {}
     for x in _Problems:
         #send either the object itself or the primary key of the referenced model when using get with foreignkey
+        print(request.user.username)
         is_present = Verdicts.objects.filter(problem_id = x, user_id = UserProfile.objects.get(user__username = request.user.username)).exists()
 
         if is_present:
             curuser = Verdicts.objects.get(problem_id = x, user_id = UserProfile.objects.get(user__username = request.user.username))
-            dux.update({x.problem_id : [x.description, x.difficulty, curuser.solved_status]})
+            dux.update({x.problem_id : [x.name, x.difficulty, curuser.solved_status]})
         else:
             newuser = UserProfile.objects.get(user__username = request.user.username)
             _newuser = Verdicts(problem_id = x, user_id = newuser, solved_status = "no")
             _newuser.save()
-            dux.update({x.problem_id : [x.description, x.difficulty, "no"]})
+            dux.update({x.problem_id : [x.name, x.difficulty, "no"]})
         
     # print(dux[1])
     context = {'context' : dux}
     # return HttpResponse("You're looking at problems list.")
     return render(request, 'appoj/problems.html', context)
+
+@login_required(login_url = '/appoj/')
+def to_problems(request, p_no):
+    curproblem = Problems.objects.filter(problem_id = p_no).values().first()
+    dux = Problems.objects.get(problem_id = p_no)
+    l = {'chicken' : "a \nb"}
+    # print(l["chicken"])
+    #print(dux.sample_input)
+    return render(request, 'appoj/display_problem.html', {'question': dux})
 
 @login_required(login_url = '/appoj/')
 def logout_view(request):

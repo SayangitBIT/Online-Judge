@@ -14,7 +14,7 @@
         <ul style= "list-style-type:none;">
             <li class = "head">Problem</li>
             {% for key, val in context.items %}
-                <li><a href="">{{val.0}}</a></li>
+                <li><a href="/appoj/problems/{{ key }}/">{{val.0}}</a></li>
             {% endfor %}
         </ul>
         <ul style= "list-style-type:none;">

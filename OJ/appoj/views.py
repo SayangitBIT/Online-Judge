@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
 from django.shortcuts import redirect
-from appoj.models import UserProfile
+from appoj.models import UserProfile, Problems, Verdicts
 
 
 # def index(request):
@@ -32,7 +32,7 @@ class register(View):
     def post(self, request):
         user = authenticate(username = request.POST['username'], password = request.POST['password'])
         if user is None:
-            newuser = User.objects.create_user(username = request.POST['username'], password = request.POST['password'], email = request.POST['email'])
+            newuser = User.objects.create_user(username = request.POST['username'], password = request.POST['password'], email = request.POST['email'])   
             # print(request.POST['username'])
             newuserprofile = UserProfile(user = newuser)
             newuser.save()
@@ -43,8 +43,25 @@ class register(View):
 
 @login_required(login_url = '/appoj/')
 def problems(request):
-    # print(request.user.username)
-    return HttpResponse("You're looking at problems list.")
+    _Problems = Problems.objects.all()
+    dux = {}
+    for x in _Problems:
+        #send either the object itself or the primary key of the referenced model when using get with foreignkey
+        is_present = Verdicts.objects.filter(problem_id = x, user_id = UserProfile.objects.get(user__username = request.user.username)).exists()
+
+        if is_present:
+            curuser = Verdicts.objects.get(problem_id = x, user_id = UserProfile.objects.get(user__username = request.user.username))
+            dux.update({x.problem_id : [x.description, x.difficulty, curuser.solved_status]})
+        else:
+            newuser = UserProfile.objects.get(user__username = request.user.username)
+            _newuser = Verdicts(problem_id = x, user_id = newuser, solved_status = "no")
+            _newuser.save()
+            dux.update({x.problem_id : [x.description, x.difficulty, "no"]})
+        
+    # print(dux[1])
+    context = {'context' : dux}
+    # return HttpResponse("You're looking at problems list.")
+    return render(request, 'appoj/problems.html', context)
 
 @login_required(login_url = '/appoj/')
 def logout_view(request):

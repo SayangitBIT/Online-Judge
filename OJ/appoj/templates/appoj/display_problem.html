@@ -1,3 +1,13 @@
 <div>
-    <p>{{question.sample_input|linebreaksbr}}</p>
+    <form id = "submit_form" action="/appoj/problems/{{question.problem_id}}/" method="POST">
+        {% csrf_token %}
+        <div class = "submission">
+            <p>{{question.description|linebreaks}}</p>
+            <p>{{question.sample_input|linebreaks}}</p>
+            <p>{{question.sample_output|linebreaks}}</p>
+            <p>{{question.samples|linebreaks}}</p>
+            <textarea id="problem_sol"name="problem_sol"rows="4"cols="50"></textarea>
+            <input type="submit" class = "submit" value="Submit">
+        </div>
+    </form>
 </div>

@@ -11,11 +11,11 @@ class UserProfile(models.Model):
 #through django admin
 class Problems(models.Model):
     problem_id = models.AutoField(primary_key = True)
-    description = models.CharField(max_length = 255)
+    description = models.TextField(max_length = 400)
     name = models.CharField(max_length = 255)
-    sample_input = models.CharField(max_length = 255)
-    sample_output = models.CharField(max_length = 255)
-    samples = models.CharField(max_length = 255)
+    sample_input = models.TextField(max_length = 400)
+    sample_output = models.TextField(max_length = 400)
+    samples = models.TextField(max_length = 400)
     difficulty = models.CharField(max_length = 200)
     score = models.FloatField(default = 0)
 

@@ -5,9 +5,12 @@ from django.views import View
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import logout
 from django.shortcuts import redirect
 from appoj.models import UserProfile, Problems, Verdicts
+from glob import glob
+import subprocess
 
 
 # def index(request):
@@ -64,14 +67,38 @@ def problems(request):
     # return HttpResponse("You're looking at problems list.")
     return render(request, 'appoj/problems.html', context)
 
-@login_required(login_url = '/appoj/')
-def to_problems(request, p_no):
-    curproblem = Problems.objects.filter(problem_id = p_no).values().first()
-    dux = Problems.objects.get(problem_id = p_no)
-    l = {'chicken' : "a \nb"}
-    # print(l["chicken"])
-    #print(dux.sample_input)
-    return render(request, 'appoj/display_problem.html', {'question': dux})
+# @login_required(login_url = '/appoj/')
+class to_problems(LoginRequiredMixin, View):
+    login_url = '/appoj/'
+    def get(self, request, p_no):
+        curproblem = Problems.objects.filter(problem_id = p_no).values().first()
+        dux = Problems.objects.get(problem_id = p_no)
+        print(dux.problem_id)
+        return render(request, 'appoj/display_problem.html', {'question': dux})
+    def post(self, request, p_no):
+        problem_sol = request.POST['problem_sol']
+        cpp_lang = open("C:/Users/Lenovo/OneDrive - Birla Institute of Technology/Desktop/C.cpp","w+")
+        cpp_lang.write(problem_sol)
+        cpp_lang.close()
+
+        ##Might comment the below lines from 83 to 89 later
+        with open("C:/Users/Lenovo/OneDrive - Birla Institute of Technology/Desktop/C.cpp", 'r') as file :
+            filedata = file.read()
+        # Replace the target string
+        filedata = filedata.replace('\n\n', '\n')
+        # Write the file out again
+        with open("C:/Users/Lenovo/OneDrive - Birla Institute of Technology/Desktop/C.cpp", 'w') as file:
+            file.write(filedata)
+        
+        process = subprocess.run('g++ C:/Users/Lenovo/"OneDrive - Birla Institute of Technology"/Desktop/C.cpp -o otx' , shell=True, capture_output=True, text=True)
+        procesd = subprocess.run("otx < C:/Users/Lenovo/PycharmProjects/input.txt", shell=True, capture_output=True, text=True)
+        
+        if procesd.stdout.strip() == open('C:/Users/Lenovo/PycharmProjects/output.txt').read():
+            print('Success')
+        else:
+            print('Fail')
+
+        return HttpResponse("You have submitted problem %s successfully" % p_no)
 
 @login_required(login_url = '/appoj/')
 def logout_view(request):

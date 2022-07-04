@@ -1,0 +1,22 @@
+{% load static %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'appoj/stylesheet/display.css' %}">
+
+<div>
+    <form id = "submit_form" action="/appoj/problems/{{question.problem_id}}/" method="POST">
+        {% csrf_token %}
+        <h1>{{question.name}}</h1>
+        <div class = "submission">
+            <p>{{question.description|linebreaksbr}}</p>
+            <br>
+            <p>{{question.sample_input|linebreaksbr}}</p>
+            <p>{{question.sample_output|linebreaksbr}}</p>
+            <br>
+            <p>{{question.samples|linebreaksbr}}</p>
+            <br>
+            <textarea id="problem_sol"name="problem_sol"rows="20"cols="70"></textarea>
+            <br>
+            <input type="submit" class = "submit" value="Submit">
+        </div>
+    </form>
+</div>

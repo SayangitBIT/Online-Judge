@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import logout
 from django.shortcuts import redirect
-from appoj.models import UserProfile, Problems, Verdicts
+from appoj.models import UserProfile, Problems, Verdicts, TestCases, Submissions
 from glob import glob
 import subprocess
 
@@ -75,8 +75,12 @@ class to_problems(LoginRequiredMixin, View):
         dux = Problems.objects.get(problem_id = p_no)
         print(dux.problem_id)
         return render(request, 'appoj/display_problem.html', {'question': dux})
+
     def post(self, request, p_no):
         problem_sol = request.POST['problem_sol']
+        test_object = TestCases.objects.get(problem_id = p_no)
+        
+
         cpp_lang = open("C:/Users/Lenovo/OneDrive - Birla Institute of Technology/Desktop/C.cpp","w+")
         cpp_lang.write(problem_sol)
         cpp_lang.close()
@@ -91,14 +95,34 @@ class to_problems(LoginRequiredMixin, View):
             file.write(filedata)
         
         process = subprocess.run('g++ C:/Users/Lenovo/"OneDrive - Birla Institute of Technology"/Desktop/C.cpp -o otx' , shell=True, capture_output=True, text=True)
-        procesd = subprocess.run("otx < C:/Users/Lenovo/PycharmProjects/input.txt", shell=True, capture_output=True, text=True)
-        
-        if procesd.stdout.strip() == open('C:/Users/Lenovo/PycharmProjects/output.txt').read():
-            print('Success')
-        else:
-            print('Fail')
+        procesd = subprocess.run(['otx', '<',  test_object.input], shell=True, capture_output=True, text=True)
 
-        return HttpResponse("You have submitted problem %s successfully" % p_no)
+        _user_id = UserProfile.objects.get(user__email = request.user.email)
+        _status = Verdicts.objects.get(problem_id_id = p_no, user_id = _user_id)
+        
+        #print(procesd.stdout)
+        if procesd.stdout.strip() == open(test_object.output).read():
+            if (_status.solved_status != "AC"):
+                _status.solved_status = "AC"
+                _status.save()
+            print('Success')
+            Submissions(problem_id_id = p_no, user_id = _user_id, _verdict = "AC").save()
+        else:
+            if (_status.solved_status != "AC" and _status.solved_status != "WA"):
+                _status.solved_status = "WA"
+                _status.save()
+            print('Fail')
+            Submissions(problem_id_id = p_no, user_id = _user_id, _verdict = "WA").save()
+        return redirect('appoj/submissions')
+
+
+@login_required(login_url = '/appoj/')
+def submissions_view(request):
+    dux = Submissions.objects.all()
+    tux = Problems.objects.all()
+    print(dux)
+    print(tux)
+    return render(request, 'appoj/submissions.html', {'question': dux})
 
 @login_required(login_url = '/appoj/')
 def logout_view(request):

@@ -1,0 +1,17 @@
+body {
+    margin-top: 5%;
+    display: flex;
+    flex: wrap;
+    flex-direction: column;
+    margin-left: 15%;
+    margin-bottom: 5%;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+textarea {
+    display: block;
+}
+
+#submit_form {
+    font-size: 1.1em;
+}

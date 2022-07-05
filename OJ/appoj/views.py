@@ -112,7 +112,7 @@ class to_problems(LoginRequiredMixin, View):
                 _status.solved_status = "WA"
                 _status.save()
             print('Fail')
-            Submissions(problem_id_id = p_no, user_id = _user_id, _vrt = "WA").save()
+            Submissions(problem_id_id = p_no, user_id = _user_id, vrt = "WA").save()
         return redirect('/appoj/submissions')
 
 

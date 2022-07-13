@@ -11,6 +11,8 @@ from django.shortcuts import redirect
 from appoj.models import UserProfile, Problems, Verdicts, TestCases, Submissions
 from glob import glob
 import subprocess
+import docker
+from docker.models.containers import Container
 
 
 # def index(request):
@@ -93,15 +95,44 @@ class to_problems(LoginRequiredMixin, View):
         # Write the file out again
         with open("C:/Users/Lenovo/OneDrive - Birla Institute of Technology/Desktop/C.cpp", 'w') as file:
             file.write(filedata)
-        
-        process = subprocess.run('g++ C:/Users/Lenovo/"OneDrive - Birla Institute of Technology"/Desktop/C.cpp -o otx' , shell=True, capture_output=True, text=True)
-        procesd = subprocess.run(['otx', '<',  test_object.input], shell=True, capture_output=True, text=True)
 
+        
+        #docker part
+        client = docker.from_env()
+        docker_img = 'online_judge_v2'
+
+        try:
+            container:Container = client.containers.get(request.user.username)
+            if(container.status != 'running'):
+                container.start()
+        except docker.errors.NotFound:
+            container = client.containers.run(docker_img,detach=True,tty=True,name=request.user.username)
+
+        con_tainer = str(container.id)
+        # print(type(container))
+        
+        subprocess.run(['docker', 'cp', 'C:/Users/Lenovo/OneDrive - Birla Institute of Technology/Desktop/C.cpp', con_tainer + ':/'])
+        subprocess.run(['docker', 'cp', test_object.input, con_tainer + ':/input.txt'])
+        subprocess.run(['docker', 'cp', 'C:/Users/Lenovo/PycharmProjects/output.txt',con_tainer + ':/'])
+        subprocess.run (['docker', 'exec', '-w', '/', con_tainer, 'g++', '-std=c++17', 'C.cpp', '-o', 'otx.out'])
+        subprocess.run(['docker', 'exec', '-w', '/', con_tainer, 'bash', '-c', "./otx.out < input.txt > output.txt"])
+        subprocess.run(['docker', 'cp', con_tainer + ':/output.txt', 'D:/Algouni OH/output.txt'])
+        
+        finout = ""
+        with open('D:/Algouni OH/output.txt', 'r') as f:
+            for line in f:
+                finout += line
+        finout = finout.strip()
+
+        
+        # process = subprocess.run('g++ C:/Users/Lenovo/"OneDrive - Birla Institute of Technology"/Desktop/C.cpp -o otx' , shell=True, capture_output=True, text=True)
+        # procesd = subprocess.run(['otx', '<',  test_object.input], shell=True, capture_output=True, text=True)
+        
         _user_id = UserProfile.objects.get(user__email = request.user.email)
         _status = Verdicts.objects.get(problem_id_id = p_no, user_id = _user_id)
         
         #print(procesd.stdout)
-        if procesd.stdout.strip() == open(test_object.output).read():
+        if finout == open(test_object.output).read():
             if (_status.solved_status != "AC"):
                 _status.solved_status = "AC"
                 _status.save()
@@ -113,15 +144,17 @@ class to_problems(LoginRequiredMixin, View):
                 _status.save()
             print('Fail')
             Submissions(problem_id_id = p_no, user_id = _user_id, vrt = "WA").save()
+
+        subprocess.run('del otx.exe', shell = True)
         return redirect('/appoj/submissions')
 
 
 @login_required(login_url = '/appoj/')
 def submissions_view(request):
-    dux = Submissions.objects.all()
+    dux = Submissions.objects.filter(user_id__user__username = request.user.username)
     tux = Problems.objects.all()
-    print(dux)
-    print(tux)
+    # print(dux)
+    # print(tux)
     return render(request, 'appoj/submissions.html', {'question': dux})
 
 @login_required(login_url = '/appoj/')
